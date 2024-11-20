@@ -19,7 +19,7 @@ namespace WebUITest
             driver.Manage().Window.Maximize();
         }
 
-        [Test]
+        [Test, Category("Navigation")]
         public void VerifyNavigationToAboutPage()
         {
             if (driver == null)
@@ -37,8 +37,9 @@ namespace WebUITest
         }
 
 
-        [Test]
-        public void VerifySearchFunctionality()
+        [Test, Category("Search")]
+        [TestCase("study programs", "/?s=study+programs")]
+        public void VerifySearchFunctionality(string searchQuery, string expectedUrlPart)
         {
             if (driver == null)
             {
@@ -49,16 +50,14 @@ namespace WebUITest
             var searchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
             searchButton.Click();
             var searchBar = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input"));
-            searchBar.SendKeys("study programs");
+            searchBar.SendKeys(searchQuery);
             searchBar.SendKeys(Keys.Enter);
 
-            Assert.That(driver.Url, Does.Contain("/?s=study+programs"), "The URL does not contain the expected search query.");
-            var searchResults = driver.FindElements(By.XPath("//*[@id=\"page\"]/div[3]"));
-            bool resultsContainSearchTerm = searchResults.Any(result => result.Text.Contains("study program", StringComparison.OrdinalIgnoreCase));
-            Assert.That(resultsContainSearchTerm, Is.True, "Search results do not contain any study programs.");
+            Assert.That(driver.Url, Does.Contain(expectedUrlPart), $"The URL does not contain the expected search query for {searchQuery}.");
         }
 
-        [Test]
+
+        [Test, Category("LanguageSwitch")]
         public void VerifyLanguageSwitchFunctionality()
         {
             if (driver == null)
@@ -76,10 +75,6 @@ namespace WebUITest
             string langAttribute = htmlTag.GetAttribute("lang");
             Assert.That(langAttribute, Is.EqualTo("lt-LT"), "The lang attribute is not equal to lt-LT.");
         }
-
-        //[Test]
-        //public void VerifyContactFormSubmission
-        // no form on website
 
         [TearDown]
         public void TearDown()

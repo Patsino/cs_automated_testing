@@ -5,6 +5,8 @@ VisualStudioVersion = 17.12.35506.116 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cs_automated_testing", "cs_automated_testing\cs_automated_testing.csproj", "{0E92E2C3-4158-4B22-BD2F-C9D2ACBDC98A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xunit_automated_testing", "xunit_automated_testing\xunit_automated_testing.csproj", "{95815E12-052D-4DD1-8DED-941A6059992C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0E92E2C3-4158-4B22-BD2F-C9D2ACBDC98A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E92E2C3-4158-4B22-BD2F-C9D2ACBDC98A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E92E2C3-4158-4B22-BD2F-C9D2ACBDC98A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95815E12-052D-4DD1-8DED-941A6059992C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95815E12-052D-4DD1-8DED-941A6059992C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95815E12-052D-4DD1-8DED-941A6059992C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95815E12-052D-4DD1-8DED-941A6059992C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
