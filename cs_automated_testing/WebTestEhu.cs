@@ -4,22 +4,25 @@ using NUnit.Compatibility;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
+[assembly: Parallelizable(ParallelScope.All)]
+
 namespace WebUITest
 {
     [TestFixture]
     public class WebTestEhu
     {
-        private IWebDriver? driver;
+        protected ThreadLocal<IWebDriver> _driver = new();
+        protected IWebDriver? driver => _driver.Value;
 
         [SetUp]
         public void SetUp()
         {
-            driver = new ChromeDriver();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
-            driver.Manage().Window.Maximize();
+            _driver.Value = new ChromeDriver();
+            _driver.Value.Manage().Window.Maximize();
         }
 
         [Test, Category("Navigation")]
+        [Parallelizable]
         public void VerifyNavigationToAboutPage()
         {
             if (driver == null)
@@ -28,8 +31,8 @@ namespace WebUITest
             }
 
             driver.Navigate().GoToUrl("https://en.ehu.lt/");
-            var searchButton = driver.FindElement(By.XPath("//*[@id=\"menu-item-16178\"]/a"));
-            searchButton.Click();
+            var aboutButton = driver.FindElement(By.XPath("//*[@id=\"menu-item-16178\"]/a"));
+            aboutButton.Click();
             Assert.That(driver.Url, Is.EqualTo("https://en.ehu.lt/about/"), "The URL does not match the expected value.");
             Assert.That(driver.Title, Is.EqualTo("About"), "The page title does not match the expected value.");
             var header = driver.FindElement(By.TagName("h1"));
@@ -38,8 +41,9 @@ namespace WebUITest
 
 
         [Test, Category("Search")]
-        [TestCase("study programs", "/?s=study+programs")]
-        public void VerifySearchFunctionality(string searchQuery, string expectedUrlPart)
+        [TestCase("study programs", "study program")]
+        [Parallelizable]
+        public void VerifySearchFunctionality(string query, string expectedText)
         {
             if (driver == null)
             {
@@ -50,14 +54,17 @@ namespace WebUITest
             var searchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
             searchButton.Click();
             var searchBar = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input"));
-            searchBar.SendKeys(searchQuery);
+            searchBar.SendKeys(query);
             searchBar.SendKeys(Keys.Enter);
-
-            Assert.That(driver.Url, Does.Contain(expectedUrlPart), $"The URL does not contain the expected search query for {searchQuery}.");
+            Assert.That(driver.Url, Does.Contain($"/?s={query.Replace(" ", "+")}"));
+            var searchResults = driver.FindElements(By.XPath("//*[@id=\"page\"]/div[3]"));
+            bool resultsContainSearchTerm = searchResults.Any(result => result.Text.Contains(expectedText, StringComparison.OrdinalIgnoreCase));
+            Assert.That(resultsContainSearchTerm, Is.True, $"Search results do not contain any expected text: {expectedText}");
         }
 
 
         [Test, Category("LanguageSwitch")]
+        [Parallelizable]
         public void VerifyLanguageSwitchFunctionality()
         {
             if (driver == null)
@@ -77,14 +84,10 @@ namespace WebUITest
         }
 
         [TearDown]
-        public void TearDown()
+        public void Teardown()
         {
-            if (driver == null)
-            {
-                throw new ArgumentNullException($"{driver} is null");
-            }
-
-            driver.Quit();
+            _driver.Value?.Quit();
+            _driver.Value?.Dispose();
         }
     }
 }
