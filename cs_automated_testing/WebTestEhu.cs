@@ -1,28 +1,25 @@
-﻿using NUnit.Framework;
-using NUnit.Framework.Constraints;
-using NUnit.Compatibility;
+﻿using cs_automated_testing.Utilities;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-
-[assembly: Parallelizable(ParallelScope.All)]
 
 namespace WebUITest
 {
     [TestFixture]
     public class WebTestEhu
     {
-        protected ThreadLocal<IWebDriver> _driver = new();
-        protected IWebDriver? driver => _driver.Value;
+        private IWebDriver? driver;
 
         [SetUp]
         public void SetUp()
         {
-            _driver.Value = new ChromeDriver();
-            _driver.Value.Manage().Window.Maximize();
+            driver = WebDriverSingleton.GetDriver;
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
+            driver.Manage().Window.Maximize();
+            driver.Navigate().GoToUrl("https://en.ehu.lt/");
         }
 
         [Test, Category("Navigation")]
-        [Parallelizable]
         public void VerifyNavigationToAboutPage()
         {
             if (driver == null)
@@ -30,7 +27,6 @@ namespace WebUITest
                 throw new ArgumentNullException($"{driver} is null");
             }
 
-            driver.Navigate().GoToUrl("https://en.ehu.lt/");
             var aboutButton = driver.FindElement(By.XPath("//*[@id=\"menu-item-16178\"]/a"));
             aboutButton.Click();
             Assert.That(driver.Url, Is.EqualTo("https://en.ehu.lt/about/"), "The URL does not match the expected value.");
@@ -39,10 +35,8 @@ namespace WebUITest
             Assert.That(header.Text, Is.EqualTo("About"), "The header text does not match the expected value.");
         }
 
-
         [Test, Category("Search")]
         [TestCase("study programs", "study program")]
-        [Parallelizable]
         public void VerifySearchFunctionality(string query, string expectedText)
         {
             if (driver == null)
@@ -62,9 +56,7 @@ namespace WebUITest
             Assert.That(resultsContainSearchTerm, Is.True, $"Search results do not contain any expected text: {expectedText}");
         }
 
-
         [Test, Category("LanguageSwitch")]
-        [Parallelizable]
         public void VerifyLanguageSwitchFunctionality()
         {
             if (driver == null)
@@ -72,7 +64,6 @@ namespace WebUITest
                 throw new ArgumentNullException($"{driver} is null");
             }
 
-            driver.Navigate().GoToUrl("https://en.ehu.lt/");
             var languageSwitchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul"));
             languageSwitchButton.Click();
             var ltButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul/li/ul/li[3]/a"));
@@ -86,8 +77,7 @@ namespace WebUITest
         [TearDown]
         public void Teardown()
         {
-            _driver.Value?.Quit();
-            _driver.Value?.Dispose();
+            WebDriverSingleton.QuitDriver();
         }
     }
 }
