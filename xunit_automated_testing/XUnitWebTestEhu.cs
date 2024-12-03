@@ -1,6 +1,6 @@
 ﻿using Xunit;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
+using WebUITest.Utilities;
 
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerClass, MaxParallelThreads = 16)]
 
@@ -13,15 +13,16 @@ namespace WebUITest
 
         public NavigationTests()
         {
-            driver = new ChromeDriver();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
-            driver.Manage().Window.Maximize();
+            driver = XUnitWebDriver.CreateBuilder()
+                .WithImplicitWait(TimeSpan.FromSeconds(30))
+                .WithMaximizedWindow(true)
+                .WithBaseUrl("https://en.ehu.lt/")
+                .Build();
         }
 
         [Fact]
         public void VerifyNavigationToAboutPage()
         {
-            driver.Navigate().GoToUrl("https://en.ehu.lt/");
             var aboutButton = driver.FindElement(By.XPath("//*[@id=\"menu-item-16178\"]/a"));
             aboutButton.Click();
             Assert.Equal("https://en.ehu.lt/about/", driver.Url);
@@ -44,15 +45,16 @@ namespace WebUITest
 
         public LanguageSwitchTests()
         {
-            driver = new ChromeDriver();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
-            driver.Manage().Window.Maximize();
+            driver = XUnitWebDriver.CreateBuilder()
+                .WithImplicitWait(TimeSpan.FromSeconds(30))
+                .WithMaximizedWindow(true)
+                .WithBaseUrl("https://en.ehu.lt/")
+                .Build();
         }
 
         [Fact]
         public void VerifyLanguageSwitchFunctionality()
         {
-            driver.Navigate().GoToUrl("https://en.ehu.lt/");
             var languageSwitchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul"));
             languageSwitchButton.Click();
             var ltButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul/li/ul/li[3]/a"));
@@ -77,16 +79,17 @@ namespace WebUITest
 
         public SearchTests()
         {
-            driver = new ChromeDriver();
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
-            driver.Manage().Window.Maximize();
+            driver = XUnitWebDriver.CreateBuilder()
+                .WithImplicitWait(TimeSpan.FromSeconds(30))
+                .WithMaximizedWindow(true)
+                .WithBaseUrl("https://en.ehu.lt/")
+                .Build();
         }
 
         [Theory]
         [InlineData("study programs", "study program")]
         public void VerifySearchFunctionalityWithDifferentQueries(string query, string expectedText)
         {
-            driver.Navigate().GoToUrl("https://en.ehu.lt/");
             var searchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
             searchButton.Click();
             var searchBar = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input"));
