@@ -23,7 +23,7 @@ namespace WebUITest
         [Fact]
         public void VerifyNavigationToAboutPage()
         {
-            var aboutButton = driver.FindElement(By.XPath("//*[@id=\"menu-item-16178\"]/a"));
+            var aboutButton = driver.FindElement(By.LinkText("About"));
             aboutButton.Click();
             Assert.Equal("https://en.ehu.lt/about/", driver.Url);
             Assert.Equal("About", driver.Title);
@@ -55,9 +55,9 @@ namespace WebUITest
         [Fact]
         public void VerifyLanguageSwitchFunctionality()
         {
-            var languageSwitchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul"));
+            var languageSwitchButton = driver.FindElement(By.CssSelector(".language-switcher"));
             languageSwitchButton.Click();
-            var ltButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul/li/ul/li[3]/a"));
+            var ltButton = driver.FindElement(By.LinkText("LT"));
             ltButton.Click();
             Assert.Equal("https://lt.ehu.lt/", driver.Url);
             var htmlTag = driver.FindElement(By.TagName("html"));
@@ -90,14 +90,14 @@ namespace WebUITest
         [InlineData("study programs", "study program")]
         public void VerifySearchFunctionalityWithDifferentQueries(string query, string expectedText)
         {
-            var searchButton = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div"));
+            var searchButton = driver.FindElement(By.ClassName("header-search"));
             searchButton.Click();
-            var searchBar = driver.FindElement(By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input"));
+            var searchBar = driver.FindElement(By.CssSelector("input.form-control[name='s']"));
             searchBar.SendKeys(query);
             searchBar.SendKeys(Keys.Enter);
 
             Assert.Contains($"/?s={query.Replace(" ", "+")}", driver.Url);
-            var searchResults = driver.FindElements(By.XPath("//*[@id=\"page\"]/div[3]"));
+            var searchResults = driver.FindElements(By.ClassName("content"));
             bool resultsContainSearchTerm = searchResults.Any(result => result.Text.Contains(expectedText, StringComparison.OrdinalIgnoreCase));
             Assert.True(resultsContainSearchTerm, $"Search results do not contain any expected text: {expectedText}");
         }

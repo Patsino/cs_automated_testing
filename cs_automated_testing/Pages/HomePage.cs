@@ -7,15 +7,14 @@ using OpenQA.Selenium;
 
 namespace cs_automated_testing.Pages
 {
-    public class HomePage : BasePage
+    public class HomePage(IWebDriver driver) : BasePage(driver)
     {
-        private readonly By AboutButton = By.XPath("//*[@id=\"menu-item-16178\"]/a");
-        private readonly By SearchButton = By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div");
-        private readonly By SearchBar = By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/div/form/div/input");
-        private readonly By LanguageSwitchButton = By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul");
-        private readonly By LithuanianLanguageButton = By.XPath("//*[@id=\"masthead\"]/div[1]/div/div[4]/ul/li/ul/li[3]/a");
-
-        public HomePage(IWebDriver driver) : base(driver) { }
+        private readonly By AboutButton = By.LinkText("About");
+        private readonly By SearchButton = By.ClassName("header-search");
+        private readonly By SearchBar = By.CssSelector("input.form-control[name='s']");
+        private readonly By SearchResults = By.ClassName("content");
+        private readonly By LanguageSwitchButton = By.CssSelector(".language-switcher");
+        private readonly By LithuanianLanguageButton = By.LinkText("LT");
 
         public void ClickAboutButton()
         {
@@ -31,6 +30,12 @@ namespace cs_automated_testing.Pages
         {
             Driver.FindElement(SearchBar).SendKeys(query);
             Driver.FindElement(SearchBar).SendKeys(Keys.Enter);
+        }
+
+        public bool HasSearchResults(string expectedText)
+        {
+            var searchResults = Driver.FindElements(SearchResults);
+            return searchResults.Any(result => result.Text.Contains(expectedText, StringComparison.OrdinalIgnoreCase));
         }
 
         public void SwitchToLithuanianLanguage()

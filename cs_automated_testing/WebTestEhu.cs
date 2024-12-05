@@ -49,9 +49,7 @@ namespace WebUITest
             homePage.ClickSearchButton();
             homePage.EnterSearchQuery(query);
             Assert.That(driver?.Url, Does.Contain($"/?s={query.Replace(" ", "+")}"));
-            var searchResults = driver?.FindElements(By.XPath("//*[@id=\"page\"]/div[3]"));
-            bool resultsContainSearchTerm = searchResults != null && searchResults.Any(result => result.Text.Contains(expectedText, StringComparison.OrdinalIgnoreCase));
-            Assert.That(resultsContainSearchTerm, Is.True, $"Search results do not contain any expected text: {expectedText}");
+            Assert.That(homePage.HasSearchResults(expectedText), Is.True, $"Search results do not contain any expected text: {expectedText}");
         }
 
         [Test, Category("LanguageSwitch")]
