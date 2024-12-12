@@ -4,106 +4,94 @@ using cs_automated_testing.Pages;
 using cs_automated_testing.Utilities;
 using FluentAssertions;
 using Serilog;
+using TechTalk.SpecFlow;
 
 namespace WebUITest
 {
-    [TestFixture]
-    public class WebTestEhu
+    [Binding]
+    public class EhuWebsiteSteps
     {
-        private IWebDriver? driver;
-        private HomePage? homePage;
-        private ILogger? logger;
+        private readonly IWebDriver driver;
+        private readonly HomePage homePage;
+        private readonly ILogger logger;
 
-        [SetUp]
-        public void SetUp()
+        public EhuWebsiteSteps()
         {
             logger = LoggerSetup.CreateLogger();
-            logger.Information("Test setup started.");
-
+            logger.Information("Test execution started.");
             driver = WebDriverSingleton.GetDriver;
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
             driver.Manage().Window.Maximize();
-            logger.Debug("Window maximized.");
-
+            logger.Debug("Browser window maximized.");
             homePage = new HomePage(driver);
+        }
+
+        [Given("I am on the homepage")]
+        public void GivenIAmOnTheHomepage()
+        {
             homePage.NavigateTo("https://en.ehu.lt/");
             logger.Information("Navigated to homepage: https://en.ehu.lt/");
         }
 
-        [Test, Category("Navigation")]
-        public void VerifyNavigationToAboutPage()
+        [When("I click the About button")]
+        public void WhenIClickTheAboutButton()
         {
-            logger.Information("Test case: VerifyNavigationToAboutPage started.");
-
-            homePage.Should().NotBeNull("HomePage object must be initialized.");
-
+            logger.Information("Clicking the 'About' button.");
             homePage.ClickAboutButton();
-            logger.Debug("Clicked 'About' button.");
-
-            string currentUrl = homePage.GetUrl();
-            currentUrl.Should().Be("https://en.ehu.lt/about/", "The URL must match the About page.");
-            logger.Information($"Verified the URL is correct: {currentUrl}");
-
-            string pageTitle = homePage.GetTitle();
-            pageTitle.Should().Be("About", "The page title must match.");
-            logger.Information($"Verified the page title is correct: {pageTitle}");
-
-            string pageHeader = homePage.GetPageHeader();
-            pageHeader.Should().Be("About", "The header text must match.");
-            logger.Information($"Verified the header text is correct: {pageHeader}");
-
-            logger.Information("Test case: VerifyNavigationToAboutPage passed.");
         }
 
-        [Test, Category("Search")]
-        [TestCase("study programs", "study program")]
-        public void VerifySearchFunctionality(string query, string expectedText)
+        [Then("I should see the About page with the correct title and header")]
+        public void ThenIShouldSeeTheAboutPageWithTheCorrectTitleAndHeader()
         {
-            logger.Information($"Test case: VerifySearchFunctionality started. Query: {query}");
+            logger.Information("Verifying the About page.");
+            homePage.GetUrl().Should().Be("https://en.ehu.lt/about/");
+            homePage.GetTitle().Should().Be("About");
+            homePage.GetPageHeader().Should().Be("About");
+        }
 
-            homePage.Should().NotBeNull("HomePage object must be initialized.");
+        [When("I search for \"(.*)\"")]
+        public void WhenISearchFor(string query)
+        {
+            logger.Information($"Searching for query: {query}");
             homePage.ClickSearchButton();
-            logger.Debug("Clicked 'Search' button.");
-
             homePage.EnterSearchQuery(query);
-            logger.Debug($"Entered search query: {query}");
-
-            string currentUrl = driver?.Url;
-            currentUrl.Should().Contain($"/?s={query.Replace(" ", "+")}", "The search URL should include the query string.");
-            logger.Information($"Verified the search URL contains the query string: {currentUrl}");
-
-            bool resultsContainSearchTerm = homePage.HasSearchResults(expectedText);
-            resultsContainSearchTerm.Should().BeTrue($"Search results should contain the expected text: {expectedText}");
-            logger.Information("Search functionality verified successfully.");
         }
 
-        [Test, Category("LanguageSwitch")]
-        public void VerifyLanguageSwitchFunctionality()
+        [Then("I should see search results containing \"(.*)\"")]
+        public void ThenIShouldSeeSearchResultsContaining(string expectedText)
         {
-            logger.Information("Test case: VerifyLanguageSwitchFunctionality started.");
+            logger.Information($"Verifying search results contain: {expectedText}");
+            homePage.HasSearchResults(expectedText).Should().BeTrue();
+        }
 
-            homePage.Should().NotBeNull("HomePage object must be initialized.");
+        [When("I switch the language to Lithuanian")]
+        public void WhenISwitchTheLanguageToLithuanian()
+        {
+            logger.Information("Switching the language to Lithuanian.");
             homePage.SwitchToLithuanianLanguage();
-            logger.Debug("Switched language to Lithuanian.");
-
-            string currentUrl = homePage.GetUrl();
-            currentUrl.Should().Be("https://lt.ehu.lt/", "The URL should match the Lithuanian homepage.");
-            logger.Information($"Verified the URL is correct: {currentUrl}");
-
-            var htmlTag = driver?.FindElement(By.TagName("html"));
-            string langAttribute = htmlTag?.GetAttribute("lang") ?? string.Empty;
-            langAttribute.Should().Be("lt-LT", "The lang attribute should indicate Lithuanian language.");
-            logger.Information($"Verified the lang attribute is correct: {langAttribute}");
-
-            logger.Information("Language switch functionality verified successfully.");
         }
 
-        [TearDown]
-        public void Teardown()
+        [Then("the URL should be \"(.*)\"")]
+        public void ThenTheUrlShouldBe(string expectedUrl)
         {
-            logger?.Information("Test teardown started.");
+            logger.Information($"Verifying URL is: {expectedUrl}");
+            homePage.GetUrl().Should().Be(expectedUrl);
+        }
+
+        [Then("the page's lang attribute should be \"(.*)\"")]
+        public void ThenThePagesLangAttributeShouldBe(string expectedLang)
+        {
+            logger.Information($"Verifying lang attribute is: {expectedLang}");
+            var htmlTag = driver.FindElement(By.TagName("html"));
+            htmlTag.GetAttribute("lang").Should().Be(expectedLang);
+        }
+
+        [AfterScenario]
+        public void AfterScenario()
+        {
+            logger.Information("Tearing down the browser.");
             WebDriverSingleton.QuitDriver();
-            logger?.Information("Browser closed and WebDriver disposed.");
+            logger.Information("Browser closed and WebDriver disposed.");
         }
     }
 }
